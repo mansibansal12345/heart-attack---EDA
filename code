@@ -1,0 +1,130 @@
+# import libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+
+custom_params = {"axes.spines.right":False,"axes.spines.top":False}
+sns.set_theme(style="ticks",rc=custom_params)
+
+sns.set_style("whitegrid")
+
+print("All modules initialized")
+
+# get the data
+heart_data = pd.read_csv("/content/heart_failure_clinical_records_dataset.csv")
+
+# print first 5 rows
+heart_data.head(5)
+
+# print last 5 rows of data
+heart_data.tail(5)
+
+# check for duplicates
+data_dup = heart_data.duplicated().any()
+print(data_dup)
+
+# data cleaning
+df_eda = pd.DataFrame(heart_data)
+df_eda["age"] = heart_data["age"]
+df_eda["anaemia"] = np.where(heart_data["anaemia"]<1, "No","Yes")
+df_eda["diabetes"] = np.where(heart_data["diabetes"]<1, "No","Yes")
+df_eda["ejection_fraction"] = heart_data["ejection_fraction"]
+df_eda["high_blood_pressure"] = np.where(heart_data["high_blood_pressure"]<1, "No","Yes")
+df_eda["platelets"] = heart_data["platelets"]
+df_eda["serum_creatinine"] = heart_data["serum_creatinine"]
+df_eda["serum_sodium"] = heart_data["serum_sodium"]
+df_eda["sex"] = np.where(heart_data["sex"]<1, "Female","Male")
+df_eda["smoking"] = np.where(heart_data["smoking"]<1, "No","Yes")
+df_eda["death_event"] = np.where(heart_data["DEATH_EVENT"]<1,"No","Yes")
+
+df_eda.head()
+
+
+df_eda.info()
+
+# remove un-needed data
+heart_data.drop(['time'],axis=1,inplace = True)
+print("Successfully removed **time** from dataset")
+
+
+heart_data.describe()
+
+# shape of dataset
+print(df_eda.shape)
+df_eda["sex"].value_counts()
+
+df_eda["high_blood_pressure"].value_counts()
+
+df_eda["diabetes"].value_counts()
+
+df_eda["smoking"].value_counts()
+
+df_eda["death_event"].value_counts()
+
+df_eda.head()
+
+#relationship of entire set (with relation to death event)
+sns.set()
+sns.pairplot(df_eda, hue="death_event",palette="cool")
+
+plt.show()
+
+sns.set()
+sns.pairplot(df_eda, hue="sex",palette="cool")
+
+plt.show()
+
+# showing relationship between categorical variable "sex" and its frequency
+plt.figure(figsize=(5,5))
+figure_1 = df_eda["sex"].value_counts(ascending = True).plot.barh(color=["salmon", "lightblue"])
+plt.title("Male/female Frequencies")
+plt.ylabel("Sex")
+plt.xlabel("Candidates")
+plt.show()
+
+# showing relationship between "death event " and its frequecy
+figure_2 = df_eda["death_event"].value_counts(ascending = True).plot.barh(color=["salmon", "lightblue"])
+plt.title("Death Event Frequencies")
+plt.ylabel("Death Event")
+plt.xlabel("number of deaths")
+plt.show()
+
+# death event per each sex
+figure_3 = plt.bar(df_eda["sex"].value_counts().index, df_eda["death_event"].value_counts(), color= ["salmon","lightblue"])
+plt.title("Death event per sex")
+plt.xlabel("Sex")
+plt.ylabel("Number of deaths")
+plt.show()
+
+# sex correlated with death rate
+plt.title("sex correlated with death rate")
+sns.heatmap((heart_data["sex"].value_counts(), heart_data["DEATH_EVENT"].value_counts()), cmap='Dark2_r',linewidth=.5,square=True, center=0)
+plt.xlabel("Sex")
+plt.ylabel("Death")
+plt.show()
+
+#relationship between age and platelets + sex
+sns.lmplot(x = "age",
+           y = "platelets",
+           hue = "sex",
+           data = df_eda).set(title='Relationship between age and platelets + sex')
+plt.show()
+
+plt.show()
+
+# smoking against death
+figure_4 = plt.barh(df_eda["smoking"].value_counts().index,df_eda["death_event"].value_counts(),color = ["salmon","lightblue"])
+plt.title("Does smoking lead to death?")
+plt.xlabel("Deaths")
+plt.ylabel("Do they smoke")
+plt.show()
+
+# high blood pressure with age
+sns.catplot(x = "high_blood_pressure",y = "age", hue= "sex", data=df_eda).set(xlabel="high blood pressure",ylabel="age of candisate",title = "relationship or HBP with age per sex ")
+plt.show()
+
+# value count for the deaths
+sns.catplot(x = "death_event",data = df_eda,kind = "count")
+plt.show()
